@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using igreja_cristo_net_api.Models;
 
@@ -31,7 +32,12 @@ public class IgrejasController : ControllerBase
             $"{url}/rest/v1/congregacoes"
         );
 
-        var igrejas = await response.Content.ReadFromJsonAsync<List<Igreja>>();
+        var igrejas = await response.Content.ReadFromJsonAsync<List<Igreja>>(
+    new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    }
+);
 
         return Ok(igrejas);
     }
