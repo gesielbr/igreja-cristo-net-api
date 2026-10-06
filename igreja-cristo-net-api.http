@@ -1,0 +1,6 @@
+@igreja_cristo_net_api_HostAddress = http://localhost:5237
+
+GET {{igreja_cristo_net_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
