@@ -26,11 +26,14 @@ public class IgrejasController : ControllerBase
 
         var key = _configuration["Supabase:Key"];
 
-        _httpClient.DefaultRequestHeaders.Add("apikey", key);
+        var request = new HttpRequestMessage(
+    HttpMethod.Get,
+    $"{url}/rest/v1/congregacoes"
+);
 
-        var response = await _httpClient.GetAsync(
-            $"{url}/rest/v1/congregacoes"
-        );
+        request.Headers.Add("apikey", key);
+
+        var response = await _httpClient.SendAsync(request);
 
         var igrejas = await response.Content.ReadFromJsonAsync<List<Igreja>>(
     new JsonSerializerOptions
