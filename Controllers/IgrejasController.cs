@@ -45,9 +45,48 @@ public class IgrejasController : ControllerBase
         return Ok(igrejas);
     }
 
-    [HttpGet("{cidade}")]
-    public IActionResult GetIgreja(string cidade)
+    [HttpGet("busca")]
+    public async Task<IActionResult> BuscarIgrejas([FromQuery] string q)
     {
-        return Ok($"Vamos buscar a igreja de {cidade} no Supabase");
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            return BadRequest("Informe um termo para pesquisa.");
+        }
+
+        var url = _configuration["Supabase:Url"];
+        var key = _configuration["Supabase:Key"];
+
+        var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            $"{url}/rest/v1/rpc/buscar_igrejas"
+        );
+
+        request.Headers.Add("apikey", key);
+
+        request.Content = JsonContent.Create(new
+        {
+            search_term = q
+        });
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+
+            return StatusCode(
+                (int)response.StatusCode,
+                error
+            );
+        }
+
+        var igrejas = await response.Content.ReadFromJsonAsync<List<Igreja>>(
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            }
+        );
+
+        return Ok(igrejas);
     }
 }
