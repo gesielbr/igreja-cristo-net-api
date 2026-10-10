@@ -89,4 +89,46 @@ public class IgrejasController : ControllerBase
 
         return Ok(igrejas);
     }
+
+
+
+
+    [HttpGet("contatos")]
+    public async Task<IActionResult> GetContatos()
+    {
+        var url = _configuration["Supabase:Url"];
+        var key = _configuration["Supabase:Key"];
+
+        var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"{url}/rest/v1/contatos_congregacoes?select=*"
+        );
+
+        request.Headers.Add("apikey", key);
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+
+            return StatusCode(
+                (int)response.StatusCode,
+                error
+            );
+        }
+
+        var contatos =
+            await response.Content.ReadFromJsonAsync<List<ContatoCongregacao>>(
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                }
+            );
+
+        return Ok(contatos);
+    }
+
+
+
 }
